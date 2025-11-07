@@ -1,0 +1,74 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background: #fafafa;
+}
+
+h1 {
+    color: #333;
+}
+
+textarea {
+    width: 100%;
+    height: 200px;
+    font-size: 1em;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 0 4px #ddd;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    border: none;
+    background: #3a7bd5;
+    color: white;
+}
+
+button[name="clean"] {
+    background: #f0ad4e;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.result {
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 0 6px #ccc;
+}
+
+.highlighted {
+    font-family: monospace;
+    white-space: pre-wrap;
+    background: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.legend {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.legend span {
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.yellow {
+    background-color: yellow;
+}
+
+.orange {
+    background-color: #ffe6b3;
+}

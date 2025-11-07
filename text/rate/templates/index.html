@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Text Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>🧠 AI Text Detector</h1>
+
+    <form method="post">
+        <label>Wklej tekst do analizy:</label><br>
+        <textarea name="text" placeholder="Wklej tutaj tekst...">{{ text }}</textarea><br>
+        <button type="submit" name="analyze">Analizuj</button>
+        <button type="submit" name="clean">Wyczyść</button>
+    </form>
+
+    {% if result %}
+    <div class="result">
+        <h2 style="color: {{ result.color }}">{{ result.verdict }}</h2>
+        <ul>
+            <li>Długość tekstu: {{ result.length }}</li>
+            <li>Podejrzane znaki typograficzne: {{ result.suspicious_chars }}</li>
+            <li>Znaki spoza ASCII (niepolskie): {{ result.non_ascii_chars }}</li>
+            <li>Średnia długość zdania: {{ "%.2f"|format(result.avg_sentence_length) }} słów</li>
+            <li>Gęstość interpunkcji: {{ "%.2f"|format(result.punctuation_density) }}%</li>
+            <li>Wskaźnik AI: {{ "%.2f"|format(result.ai_score) }}</li>
+        </ul>
+        <div class="legend">
+            🔶 <span class="yellow">żółty</span> – podejrzane znaki typograficzne<br>
+            🟧 <span class="orange">jasnopomarańczowy</span> – inne znaki spoza ASCII
+        </div>
+        <h3>Podgląd z zaznaczeniem znaków:</h3>
+        <div class="highlighted">{{ result.highlighted_text|safe }}</div>
+    </div>
+    {% endif %}
+</body>
+</html>
