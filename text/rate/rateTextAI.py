@@ -98,31 +98,39 @@ def clean_text(text: str) -> str:
 
 # --- analiza (używa wag) ---
 def analyze_text(text: str, weights_map):
+    import html, re
+
     allowed_chars = set("ąćęłńóśźżĄĆĘŁŃÓŚŹŻ")
     total_chars = len(text)
 
+    # --- Podejrzane znaki typograficzne ---
     suspicious_counts = {}
     weighted_score = 0.0
     for ch, w in weights_map.items():
-        cnt = text.count(ch)
-        if cnt:
+        if ch in text:  # tylko jeśli znak występuje
+            cnt = text.count(ch)
             suspicious_counts[ch] = cnt
             weighted_score += cnt * float(w)
 
-    non_ascii_count = sum(
-        1 for c in text
+    # --- Znaki spoza ASCII (niepolskie) ---
+    non_ascii_chars = [
+        c for c in text
         if ord(c) > 127 and c not in allowed_chars and c not in weights_map
-    )
+    ]
+    non_ascii_count = len(non_ascii_chars)
 
+    # --- Średnia długość zdania ---
     sentences = re.split(r'[.!?]+', text)
     sentences = [s.strip() for s in sentences if s.strip()]
     avg_sentence_length = sum(len(s.split()) for s in sentences) / max(1, len(sentences))
 
+    # --- Gęstość interpunkcji ---
     commas = text.count(',')
     semicolons = text.count(';')
     dashes = text.count('-') + text.count('–') + text.count('—')
     punctuation_density = (commas + semicolons + dashes) / max(1, total_chars) * 100
 
+    # --- Wynik AI ---
     ai_score = (
         weighted_score * 1.8 +
         non_ascii_count * 0.5 +
@@ -131,15 +139,16 @@ def analyze_text(text: str, weights_map):
     ) / max(1, total_chars / 100)
 
     if ai_score > 2.0:
-        verdict = "❗ Możliwe, że tekst został wygenerowany przez AI"
+        verdict = "❗ Bardzo możliwe, że tekst został wygenerowany przez AI"
         color = "red"
     elif ai_score > 0.7:
-        verdict = "⚠️ Tekst może mieć elementy charakterystyczne dla AI"
+        verdict = "⚠️ Tekst posiada elementy charakterystyczne dla AI"
         color = "orange"
     else:
         verdict = "✅ Tekst wygląda na pisany przez człowieka"
         color = "green"
 
+    # --- Podświetlenia ---
     highlighted = ""
     for c in text:
         esc = html.escape(c)
@@ -159,10 +168,33 @@ def analyze_text(text: str, weights_map):
 
     suspicious_chars_list = list(suspicious_counts.keys())
     suspicious_count = sum(suspicious_counts.values())
+    non_ascii_chars_list = sorted(set(non_ascii_chars))
 
-    non_ascii_chars_list = sorted(
-        set(c for c in text if ord(c) > 127 and c not in allowed_chars and c not in weights_map)
-    )
+    # --- Tabela: wszystkie znaki ---
+    suspicious_summary = []
+
+    # 1️⃣ Typograficzne (z weights_map)
+    for ch, count in suspicious_counts.items():
+        suspicious_summary.append({
+            "char": ch,
+            "count": count,
+            "desc": "Podejrzany znak typograficzny",
+            "weight": weights_map.get(ch, 0),
+            "type": "typograficzny"
+        })
+
+    # 2️⃣ Znaki spoza ASCII
+    for ch in non_ascii_chars_list:
+        suspicious_summary.append({
+            "char": ch,
+            "count": non_ascii_chars.count(ch),
+            "desc": "Znak spoza ASCII (niepolski)",
+            "weight": 0,
+            "type": "spoza ASCII"
+        })
+
+    # Sortuj dla spójności (np. typograficzne najpierw)
+    suspicious_summary.sort(key=lambda x: (x["type"], -x["count"]))
 
     return {
         "length": total_chars,
@@ -177,9 +209,9 @@ def analyze_text(text: str, weights_map):
         "ai_score": round(ai_score, 3),
         "verdict": verdict,
         "color": color,
-        "highlighted_text": highlighted
+        "highlighted_text": highlighted,
+        "suspicious_summary": suspicious_summary
     }
-
 
 # --- ROUTES ---
 
@@ -193,18 +225,6 @@ def index():
             text = clean_text(text)
         elif "analyze" in request.form:
             result = analyze_text(text, weights)
-
-            # przygotuj czytelną listę do szablonu: char, count, weight, desc
-            suspicious_summary = []
-            for ch, cnt in result.get("suspicious_counts", {}).items():
-                suspicious_summary.append({
-                    "char": ch,
-                    "count": cnt,
-                    "weight": weights.get(ch, 0),
-                    "desc": CHAR_DESCRIPTIONS.get(ch, "")
-                })
-            result["suspicious_summary"] = suspicious_summary
-
     return render_template("index.html", result=result, text=text)
 
 @app.route("/settings", methods=["GET", "POST"])

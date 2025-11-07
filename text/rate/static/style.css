@@ -173,6 +173,14 @@ button:hover, .link-btn:hover {
   font-weight: 700;
 }
 
+.typographic-row {
+  background: #fff8d6;
+}
+
+.nonascii-row {
+  background: #ffe5cc;
+}
+
 /* Suspicious summary table */
 .sus-table, table {
   width: 100%;
