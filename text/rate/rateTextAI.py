@@ -1,11 +1,35 @@
+#!/usr/bin/env python3
 from flask import Flask, render_template_string, request
 import re
 import html
 
 app = Flask(__name__)
 
+# --- Funkcja czyszcząca tekst (Twoja wersja) ---
+def clean_text(text: str) -> str:
+    replacements = {
+        "–": "-",  # półpauza
+        "—": "-",  # pauza
+        "“": "\"", "”": "\"",  # cudzysłowy angielskie
+        "„": "\"", "‟": "\"",  # polskie otwierające
+        "‘": "'", "’": "'", "‚": "'",  # pojedyncze cudzysłowy
+        "…": "...",  # wielokropek
+        "\u00A0": " ",  # spacja niełamliwa
+        '\u2009': " ",  # wąska spacja
+        '\u202F': " ",  # wąska niełamliwa spacja
+        "•": "-",  # punktory
+        "→": "->",
+        "←": "<-",
+        "’": "'",
+    }
+
+    for k, v in replacements.items():
+        text = text.replace(k, v)
+    return text
+
+
+# --- Analiza tekstu (Twoja oryginalna funkcja) ---
 def analyze_text(text: str):
-    # Typowe znaki typograficzne, które mogą sugerować generację przez AI lub edytor tekstu
     suspicious_chars = {
         '„', '”', '«', '»', '‘', '’', '‚', '–', '—', '•', '…',
         '\u00A0',  # niełamliwa spacja
@@ -71,6 +95,7 @@ def analyze_text(text: str):
     }
 
 
+# --- Szablon HTML ---
 TEMPLATE = """
 <!DOCTYPE html>
 <html lang="pl">
@@ -92,8 +117,9 @@ TEMPLATE = """
     <h1>🧠 AI Text Detector</h1>
     <form method="post">
         <label>Wklej tekst do analizy:</label><br>
-        <textarea name="text" placeholder="Wklej tutaj tekst...">{{ request.form.text or '' }}</textarea><br>
-        <button type="submit">Analizuj</button>
+        <textarea name="text" placeholder="Wklej tutaj tekst...">{{ text or '' }}</textarea><br>
+        <button type="submit" name="action" value="analyze">Analizuj</button>
+        <button type="submit" name="action" value="clean">Wyczyść</button>
     </form>
 
     {% if result %}
@@ -114,19 +140,36 @@ TEMPLATE = """
         <h3>Podgląd z zaznaczeniem znaków:</h3>
         <div class="highlighted">{{ result.highlighted_text|safe }}</div>
     </div>
+    {% elif cleaned %}
+    <div class="result">
+        <h2>✅ Tekst został oczyszczony</h2>
+        <div class="highlighted">{{ cleaned|safe }}</div>
+    </div>
     {% endif %}
 </body>
 </html>
 """
 
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     result = None
+    cleaned = None
+    text = ""
+
     if request.method == "POST":
         text = request.form.get("text", "")
-        result = analyze_text(text)
-    return render_template_string(TEMPLATE, result=result, request=request)
+        action = request.form.get("action")
+
+        if action == "analyze":
+            result = analyze_text(text)
+        elif action == "clean":
+            cleaned = clean_text(text)
+            text = cleaned  # aby po oczyszczeniu był widoczny w polu tekstowym
+
+    return render_template_string(TEMPLATE, result=result, cleaned=cleaned, text=text)
 
 
 if __name__ == "__main__":
+    print("Serwer działa na http://127.0.0.1:5000")
     app.run(debug=True)
