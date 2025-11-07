@@ -1,74 +1,196 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 40px;
-    background: #fafafa;
+/* ===========================
+   AI Text Detector - style.css (poprawiona wersja, kolory spójne)
+   =========================== */
+
+:root {
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #1976d2;
+  --accent-2: #f0ad4e;
+  --radius: 10px;
+
+  /* Spójne kolory podświetleń */
+  --sus-light: #fff066;   /* jasnożółty – podejrzane znaki typograficzne */
+  --sus-strong: #ff9800;  /* intensywny pomarańczowy – znaki spoza ASCII */
 }
 
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: #222;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 960px;
+  margin: 36px auto;
+  background: var(--card);
+  padding: 26px;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(16,24,40,0.06);
+}
+
+/* Header */
 h1 {
-    color: #333;
+  margin: 0 0 18px 0;
+  text-align: center;
+  font-size: 1.6rem;
+  color: #111827;
+}
+
+/* Form area */
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #111827;
 }
 
 textarea {
-    width: 100%;
-    height: 200px;
-    font-size: 1em;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-shadow: inset 0 0 4px #ddd;
+  width: 100%;
+  min-height: 200px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e6eef6;
+  font-family: "Courier New", Consolas, monospace;
+  font-size: 14px;
+  resize: vertical;
+  color: #111827;
+  background: #fff;
+  box-shadow: inset 0 1px 2px rgba(16,24,40,0.02);
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 1em;
-    margin-top: 10px;
-    cursor: pointer;
-    border-radius: 6px;
-    border: none;
-    background: #3a7bd5;
-    color: white;
+.buttons {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-button[name="clean"] {
-    background: #f0ad4e;
+/* Wszystkie przyciski - identyczny wygląd i rozmiar */
+button, .link-btn {
+  display: inline-block;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  background: var(--accent);
+  transition: transform .06s ease, box-shadow .06s ease;
+  font-size: 14px;
+  line-height: 1.2;
+  height: 40px;
 }
 
-button:hover {
-    opacity: 0.9;
+button:hover, .link-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(16,24,40,0.08);
 }
 
+#clean { background: var(--accent-2); color: #111; }
+
+/* Result card */
 .result {
-    margin-top: 30px;
-    padding: 20px;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 0 6px #ccc;
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff, #fcfeff);
+  border: 1px solid #eef6fb;
 }
 
-.highlighted {
-    font-family: monospace;
-    white-space: pre-wrap;
-    background: #fff;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
+.statlist {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
 }
 
+.statlist li {
+  padding: 6px 0;
+  border-bottom: 1px dashed #f1f6fb;
+  color: #334155;
+}
+
+/* Legend */
 .legend {
-    margin-top: 10px;
-    font-size: 0.9em;
-    color: #555;
+  margin-top: 10px;
+  color: #555;
+  line-height: 1.6;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.legend span {
-    padding: 2px 5px;
-    border-radius: 3px;
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #333;
+  gap: 8px;
 }
 
-.yellow {
-    background-color: yellow;
+.legend-color {
+  width: 18px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid #999;
 }
 
-.orange {
-    background-color: #ffe6b3;
+.legend-color.yellow { background: var(--sus-light); }
+.legend-color.orange { background: var(--sus-strong); }
+
+/* Highlighted text */
+.highlighted {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fbfdff;
+  border: 1px solid #eef6fb;
+  font-family: "Courier New", Consolas, monospace;
+  white-space: pre-wrap;
+}
+
+/* Podejrzane znaki (dokładnie te same kolory co legenda) */
+.sus {
+  background-color: var(--sus-light) !important;
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+.nonascii {
+  background-color: var(--sus-strong) !important;
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+/* Suspicious summary table */
+.sus-table, table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.sus-table th, .sus-table td, table th, table td {
+  padding: 8px 10px;
+  border: 1px solid #eef6fb;
+  text-align: center;
+}
+
+table th { background: #fbfbfd; }
+
+/* Responsive */
+@media (max-width: 720px) {
+  .buttons { flex-direction: column; align-items: stretch; }
+  textarea { min-height: 160px; }
 }

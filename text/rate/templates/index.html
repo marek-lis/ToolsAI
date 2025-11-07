@@ -1,38 +1,80 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>AI Text Detector</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <div class="container">
     <h1>🧠 AI Text Detector</h1>
 
     <form method="post">
-        <label>Wklej tekst do analizy:</label><br>
-        <textarea name="text" placeholder="Wklej tutaj tekst...">{{ text }}</textarea><br>
+      <label for="text">Wklej tekst do analizy:</label>
+      <textarea id="text" name="text" placeholder="Wklej tutaj...">{{ text }}</textarea>
+
+      <div class="buttons">
         <button type="submit" name="analyze">Analizuj</button>
         <button type="submit" name="clean">Wyczyść</button>
+        <a class="link-btn" href="{{ url_for('settings') }}">⚙️ Ustawienia wag</a>
+      </div>
     </form>
 
     {% if result %}
     <div class="result">
-        <h2 style="color: {{ result.color }}">{{ result.verdict }}</h2>
-        <ul>
-            <li>Długość tekstu: {{ result.length }}</li>
-            <li>Podejrzane znaki typograficzne: {{ result.suspicious_chars }}</li>
-            <li>Znaki spoza ASCII (niepolskie): {{ result.non_ascii_chars }}</li>
-            <li>Średnia długość zdania: {{ "%.2f"|format(result.avg_sentence_length) }} słów</li>
-            <li>Gęstość interpunkcji: {{ "%.2f"|format(result.punctuation_density) }}%</li>
-            <li>Wskaźnik AI: {{ "%.2f"|format(result.ai_score) }}</li>
-        </ul>
-        <div class="legend">
-            🔶 <span class="yellow">żółty</span> – podejrzane znaki typograficzne<br>
-            🟧 <span class="orange">jasnopomarańczowy</span> – inne znaki spoza ASCII
-        </div>
-        <h3>Podgląd z zaznaczeniem znaków:</h3>
-        <div class="highlighted">{{ result.highlighted_text|safe }}</div>
+      <h2 id="verdict" style="color: {{ result.color }};">{{ result.verdict }}</h2>
+
+      <ul class="statlist">
+        <li><strong>Długość tekstu:</strong> {{ result.length }}</li>
+        <li><strong>Średnia długość zdania:</strong> {{ "%.2f"|format(result.avg_sentence_length) }} słów</li>
+        <li><strong>Waga (suma):</strong> {{ result.weighted_score }}</li>
+
+        <li>
+          <strong>Podejrzane znaki typograficzne:</strong>
+          {{ result.suspicious_count }}
+          {% if result.suspicious_chars_list %}
+            ({{ result.suspicious_chars_list | join(' ') }})
+          {% endif %}
+        </li>
+
+        <li>
+          <strong>Znaki spoza ASCII (niepolskie):</strong>
+          {{ result.non_ascii_count }}
+          {% if result.non_ascii_chars_list %}
+            ({{ result.non_ascii_chars_list | join(' ') }})
+          {% endif %}
+        </li>
+
+        <li><strong>Gęstość interpunkcji:</strong> {{ "%.2f"|format(result.punctuation_density) }}%</li>
+        <li><strong>AI score:</strong> {{ "%.3f"|format(result.ai_score) }}</li>
+      </ul>
+
+    <div class="legend">
+      <span class="legend-item"><span class="legend-color yellow"></span> Podejrzane znaki typograficzne</span><br>
+      <span class="legend-item"><span class="legend-color orange"></span> Znaki spoza ASCII (niepolskie)</span>
+    </div>
+
+      <h3>Podświetlony tekst:</h3>
+      <div class="highlighted">{{ result.highlighted_text|safe }}</div>
+
+      <h3>Szczegóły wykrytych znaków:</h3>
+      {% if result.suspicious_summary %}
+        <table class="sus-table">
+          <tr><th>Znak</th><th>Ilość</th><th>Opis</th><th>Waga</th></tr>
+          {% for s in result.suspicious_summary %}
+          <tr>
+            <td><code>{{ s.char }}</code></td>
+            <td>{{ s.count }}</td>
+            <td>{{ s.desc }}</td>
+            <td>{{ s.weight }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      {% else %}
+        <p>Brak wykrytych podejrzanych znaków.</p>
+      {% endif %}
     </div>
     {% endif %}
+  </div>
 </body>
 </html>

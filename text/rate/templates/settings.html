@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Ustawienia wag</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Ustawienia wag podejrzanych znaków</h1>
+    <button type="button" class="link-btn" onclick="history.back()">⬅️ Powrót</button>
+
+    <form method="post">
+      <table>
+        <tr><th>Znak</th><th>Waga (0–10)</th><th>Aktualna wartość</th><th>Opis</th></tr>
+        {% for ch, val, desc in settings_list %}
+        <tr>
+          <td><code>{{ ch }}</code></td>
+          <td>
+            <input type="range" name="{{ ch }}" min="0" max="10" step="0.1" value="{{ val }}" oninput="document.getElementById('v_{{ loop.index }}').textContent=this.value">
+          </td>
+          <td><span id="v_{{ loop.index }}">{{ "%.1f"|format(val) }}</span></td>
+          <td>{{ desc }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+
+      <div class="buttons">
+        <button type="submit">💾 Zapisz</button>
+        <button type="button" onclick="if(confirm('Przywrócić domyślne wagi?')) { fetch('/reset_weights', {method:'POST'}).then(()=>location.reload()); }">🔄 Przywróć domyślne</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
